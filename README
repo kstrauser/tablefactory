@@ -7,8 +7,8 @@ or Django projects.
 # Motivation
 
 I maintain a website that provides many custom reports to its users, and
-most of them need to be available several different output formats. Almost
-all of those reports follow the same pattern:
+most of them need to be available in several different output formats.
+Almost all of those reports follow the same pattern:
 
 1. Run a database query,
 2. Reformat the data slightly as needed, and
