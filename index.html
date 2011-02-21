@@ -8,20 +8,20 @@
   <style type="text/css">
     body {
       margin-top: 1.0em;
-      background-color: #32ce1c;
-      font-family: "Helvetica,Arial,FreeSans";
-      color: #ffffff;
+      background-color: white;
+      font-family: Helvetica,Arial,FreeSans;
+      color: #002;
     }
     #container {
       margin: 0 auto;
       width: 700px;
     }
-    h1 { font-size: 3.8em; color: #cd31e3; margin-bottom: 3px; }
+    h1 { font-size: 3.8em; color: #008; margin-bottom: 3px; }
     h1 .small { font-size: 0.4em; }
     h1 a { text-decoration: none }
-    h2 { font-size: 1.5em; color: #cd31e3; }
-    h3 { text-align: center; color: #cd31e3; }
-    a { color: #cd31e3; }
+    h2 { font-size: 1.5em; color: #008; }
+    h3 { text-align: center; color: #008; }
+    a { color: #008; }
     .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
     .download { float: right; }
     pre { background: #000; color: #fff; padding: 15px;}
@@ -50,13 +50,83 @@
     </div>
 
     <p>TableFactory is a simple API for creating tables in popular formats. It acts as a wrapper around other popular Python report generators and handles all the tedious, boilerplate problems of extracting columns from input data, creating the layout, applying formatting to cells, etc.
-</p><h2>Dependencies</h2>
-<p>xlwt (http://pypi.python.org/pypi/xlwt) for generating Excel spreadsheets ReportLab (http://www.reportlab.com/software/opensource/) for generating PDFsxlwt (http://pypi.python.org/pypi/xlwt) for generating Excel spreadsheets</p>
-<p>ReportLab (http://www.reportlab.com/software/opensource/) for generating PDFs</p>
+</p>
+
+<h2>Why?</h2>
+
+<p>I maintain an internal web application with many reports for our
+customers. After writing the code to generate a report's data, I'd have to
+make custom backends to write that data out in each of several formats that
+different customers might want. If someone asked me to add a new column to a
+report, I'd have to add it separately to each of the output types.  That got
+old quickly.</p>
+
+<p>TableFactory is my solution to the problem. It lets me spend my efforts
+on making efficient, useful reports instead of on the boring, repetitive
+process of formatting them.</p>
+
+<h2>Dependencies</h2>
+<p>HTML tables are made using only standard Python modules.</p>
+<p>Spreadsheets are made with <tt>xlwt</tt> (<a href="http://pypi.python.org/pypi/xlwt">http://pypi.python.org/pypi/xlwt</a>).</p>
+<p>PDFs are made with <tt>ReportLab</tt> (<a href="http://www.reportlab.com/software/opensource/">http://www.reportlab.com/software/opensource/</a>).</p>
+
+<h2>Examples and Screenshots</h2>
+
+<p>All of the images below were taken from the built-in example/test function. It creates a list of dicts representing fake invoices, then uses them to create a table in each of the output formats.</p>
+
+<pre>
+rows = [...list of dicts, SQLAlchemy row objects, or just
+        about anything else with columns that can be accessed
+        by name or attribute...]
+</pre>
+
+<p>First, I made a "row specification" with three columns for the invoice number, a customer's name, and an invoice amount:</p>
+
+<pre>
+invoicerow = RowSpec(ColumnSpec('invoiceid', 'Invoice #'),
+                     ColumnSpec('name', 'Customer Name'),
+                     ColumnSpec('amount', 'Total', money=True))
+</pre>
+
+<p>Next, I used the <tt>invoicerow</tt> object to turn the list of invoice
+rows into a list of TableFactory's "TableRow" objects:</p>
+
+<pre>lines = invoicerow.makeall(rows)</pre>
+
+<p>Finally, I created each of the tables:</p>
+
+<h3>HTML</h3>
+<pre>
+HTMLTable('Invoices by Customer',
+          'Amount of each invoice, sorted by invoiceid',
+          headers=invoicerow).render(lines)
+</pre>
+<a href="images/invoicehtml.png"><img src="images/invoicehtml.png" width="162" height="269"></a>
+
+<h3>Excel</h3>
+<pre>
+SpreadsheetTable('Invoices by Customer',
+                 'Amount of each invoice, sorted by invoiceid',
+                 headers=invoicerow).render(lines)
+</pre>
+<a href="images/invoicexls.png"><img src="images/invoicexls.png" width="191" height="284"></a>
+
+<h3>PDF</h3>
+<pre>
+PDFTable('Invoices by Customer',
+         'Amount of each invoice, sorted by invoiceid',
+         headers=invoicerow).render(lines)
+</pre>
+<a href="images/invoicepdf.png"><img src="images/invoicepdf.png" width="350" height="198"></a>
+
+<p>Notice that the only difference in creating the different types of tables
+is in the name of the class used to make each one. They share the same
+configuration and processed input data.</p>
+
 <h2>Install</h2>
-<p>Coming soon: PyPI, easy_install, pip, etc. Those aren't ready yet, though. To get started now, download TableFactory.py from https://github.com/kstrauser/tablefactory/blob/master/TableFactory.py and copy it somewhere in your Python path. For example, /usr/local/lib/python2.6/site-packages might be a reasonable location on a Ubuntu system.</p>
+<p>Coming soon: PyPI, easy_install, pip, etc. Those aren't ready yet, though. To get started now, download TableFactory.py from <a href="https://github.com/kstrauser/tablefactory/blob/master/TableFactory.py">https://github.com/kstrauser/tablefactory/blob/master/TableFactory.py</a> and copy it to somewhere in your Python path. For example, <tt>/usr/local/lib/python2.6/site-packages</tt> might be a reasonable location on a Ubuntu system.</p>
 <h2>License</h2>
-<p>MIT</p>
+<p>TableFactory is available under the permissive MIT License.</p>
 <h2>Authors</h2>
 <p>Kirk Strauser (kirk@strauser.com)<br/><br/>      </p>
 <h2>Contact</h2>
