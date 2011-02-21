@@ -66,6 +66,7 @@ import StringIO
 
 import xlwt
 from reportlab.lib import colors
+from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
@@ -76,6 +77,8 @@ class StyleAttributes(object):
     applied to a cell. Current properties are:
 
           bold: bool, display a cell in bold
+
+          money: bool, display the cell right-aligned
     
           width: float, the width of a column in inches
 
@@ -287,6 +290,7 @@ class PDFTable(TableBase):
     explanationstyle = ParagraphStyle(name='Explanation Style', fontName='Helvetica', fontSize=12)
     headercellstyle = ParagraphStyle(name='Table Header Style', fontName='Helvetica-Bold', textColor=colors.white)
     contentcellstyle = ParagraphStyle(name='Table Cell Style', fontName='Helvetica', fontSize=8)
+    contentmoneycellstyle = ParagraphStyle(name='Table Cell Style', fontName='Helvetica', fontSize=8, alignment=TA_RIGHT)
 
     def _rendercell(self, cell):
         """Render data as a Paragraph"""
@@ -297,7 +301,11 @@ class PDFTable(TableBase):
         if cell.style.bold:
             value = '<b>%s</b>' % value
 
-        return Paragraph(value, self.contentcellstyle)
+        if cell.style.money:
+            style = self.contentmoneycellstyle
+        else:
+            style = self.contentcellstyle
+        return Paragraph(value, style)
     
     def render(self, rowsets):
         """Return the data as a binary string holding a PDF"""
@@ -367,9 +375,9 @@ class SpreadsheetTable(TableBase):
     # Styles to apply to given data types. The style for None is the
     # default when no other type is applicable.
     styletypemap = {
-        None             : {'normal': xlwt.easyxf()},
-        datetime.date    : {'normal': xlwt.easyxf(num_format_str='YYYY-MM-DD')},
-        datetime.datetime: {'normal': xlwt.easyxf(num_format_str='YYYY-MM-DD HH:MM:SS')},
+        None             : {None: xlwt.easyxf()},
+        datetime.date    : {None: xlwt.easyxf(num_format_str='YYYY-MM-DD')},
+        datetime.datetime: {None: xlwt.easyxf(num_format_str='YYYY-MM-DD HH:MM:SS')},
         }
 
     def _getstyle(self, cell):
@@ -379,18 +387,31 @@ class SpreadsheetTable(TableBase):
             cellstyles = self.styletypemap[type(cell.value)]
         except KeyError:
             cellstyles = self.styletypemap[None]
+        # Build the list of desired attributes
+        attrs = set()
+        if cell.style.bold:
+            attrs.add('bold')
+        if cell.style.money:
+            attrs.add('money')
 
-        if not cell.style.bold:
-            return cellstyles['normal']
-
-        # Pick the style appropriate to this cell's properties
+        # Use the cached value if we've already seen this style
         try:
-            return cellstyles['bold']
+            return cellstyles[tuple(sorted(attrs))]
         except KeyError:
-            boldstyle = copy.deepcopy(cellstyles['normal'])
-            boldstyle.font.bold = 1
-            cellstyles['bold'] = boldstyle
-            return boldstyle
+            pass
+
+        # Build the style by copying the default and applying each of
+        # the requested attributes
+        cellstyle = copy.deepcopy(cellstyles[None])
+        if 'bold' in attrs:
+            cellstyle.font.bold = 1
+        if 'money' in attrs:
+            cellstyle.alignment.horz = xlwt.Alignment.HORZ_RIGHT
+            cellstyle.num_format_str = '0.00'
+
+        # Cache the results for next time
+        cellstyles[tuple(sorted(attrs))] = cellstyle
+        return cellstyle
     
     def render(self, rowsets):
         """Return the data as a binary string holding an Excel spreadsheet"""
@@ -402,7 +423,7 @@ class SpreadsheetTable(TableBase):
             mainsheet.write(rownum, 0, self.explanation, self.explanationstyle)
             # Clear the first row's color, or else the headerstyle
             # will take over. I have no idea why.
-            mainsheet.row(0).set_style(self.styletypemap[None]['normal'])
+            mainsheet.row(0).set_style(self.styletypemap[None][None])
             rownum += 2
         
         # Generate any header rows
@@ -439,14 +460,20 @@ class HTMLTable(TableBase):
     # These are the CSS classes emitted by the generator
     cssdefs = {
         'bold'      : 'cell_bold',
+        'money'     : 'cell_money',
         'tablestyle': 'reporttable',
         }
     
     def _rendercell(self, cell):
         """Render data as a td"""
 
+        cssclasses = []
         if cell.style.bold:
-            cssstring = ' class="%s"' % self.cssdefs['bold']
+            cssclasses.append(self.cssdefs['bold'])
+        if cell.style.money:
+            cssclasses.append(self.cssdefs['money'])
+        if cssclasses:
+            cssstring = ' class="%s"' % ' '.join(cssclasses)
         else:
             cssstring = ''
         colspan = cell.style.span
@@ -506,7 +533,36 @@ class HTMLTable(TableBase):
         return '\n'.join(lines)
     
 def example():
-    """Create a sample table"""
+    """Create a set of sample tables"""
+
+    # In practice, you'd most likely be embedding your HTML tables in
+    # a web page template. For demonstration purposes, we'll create a
+    # simple page with a few default styles.
+    htmlheader = """\
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<title>Sample table</title>
+<style type="text/css">
+body { font-family: Helvetica,Arial,FreeSans; }
+table.reporttable { border-style: solid; border-width: 1px; }
+table.reporttable tr.tr_odd { background-color: #eee; }
+table.reporttable tr.tr_even { background-color: #bbb; }
+table.reporttable th { background-color: blue; color: white; }
+table.reporttable td.cell_bold { font-weight: bold; }
+table.reporttable td.cell_money { text-align: right; font-family: monospace; }
+</style>
+</head>
+<body>
+"""
+    htmlfooter = """\
+</body>
+</html>"""
+
+    exampletypes = ((PDFTable, 'pdf'), (HTMLTable, 'html'), (SpreadsheetTable, 'xls'))
+    
+    #### Example with several row types
+    
     mainrs = RowSpec(
         ColumnSpec('foo', 'Column 1', width=1),
         ColumnSpec('bar', 'Column 2', width=1),
@@ -534,50 +590,46 @@ def example():
         lines.append(mainrs({'foo': i, 'bar': 14, 'baz': 15, 'qux': 'extra'}))
     lines.append(summaryrow({'junk1': None, 'baz': 'Summary!', 'junk2': None}))
 
-    for tableclass, extension in ((PDFTable, 'pdf'),
-                                  (HTMLTable, 'html'),
-                                  (SpreadsheetTable, 'xls')):
-        outfile = open('testtable.%s' % extension, 'wb')
-
+    for tableclass, extension in exampletypes:
+        outfile = open('showcase.%s' % extension, 'wb')
         if tableclass is HTMLTable:
-            # Enclose HTML tables in a valid web page for example
-            # purposes
-            outfile.write("""\
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
-<html>
-<head>
-<title>Sample table</title>
-<style type="text/css">
-table.reporttable {
-  border-style: solid;
-  border-width: 1px;
-}
-td.cell_bold {
-  font-weight: bold;
-}
-tr.tr_odd {
-  background-color: #eee;
-}
-tr.tr_even {
-  background-color: #bbb;
-}
-table.reporttable th {
-  background-color: blue;
-  color: white;
-}
-</style>
-</head>
-<body>
-""")
+            outfile.write(htmlheader)
         outfile.write(tableclass('Sample Table',
                                  '%s test' % extension.upper(),
                                  headers=[mainrs, subrow1, subrow2]).render(lines))
-
         if tableclass is HTMLTable:
-            # Close the HTML page wrapping our table
-            outfile.write("""\
-</body>
-</html>""")
+            outfile.write(htmlfooter)
+
+            
+    #### Example of a typical "invoices" table
+
+    import decimal
+    import random
+
+    # Most common names in the US, according to the census
+    names = ['Smith', 'Johnson', 'Williams', 'Jones', 'Brown', 'Davis', 'Miller', 'Wilson',
+             'Moore', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin',
+             'Thompson', 'Garcia']
+    random.shuffle(names)
+    rows = [{'invoiceid': invoiceid,
+             'name': name,
+             'amount': decimal.Decimal('%.2f' % (random.randrange(500000) / 100.0))}
+            for invoiceid, name in enumerate(names)]
+
+    invoicerow = RowSpec(ColumnSpec('invoiceid', 'Invoice #'),
+                         ColumnSpec('name', 'Customer Name'),
+                         ColumnSpec('amount', 'Total', money=True))
+    lines = invoicerow.makeall(rows)
+    
+    for tableclass, extension in exampletypes:
+        outfile = open('invoice.%s' % extension, 'wb')
+        if tableclass is HTMLTable:
+            outfile.write(htmlheader)
+        outfile.write(tableclass('Invoices by Customer',
+                                 'Amount of each invoice, sorted by invoiceid',
+                                 headers=invoicerow).render(lines))
+        if tableclass is HTMLTable:
+            outfile.write(htmlfooter)
 
 if __name__ == '__main__':
     for _ in range(1):
