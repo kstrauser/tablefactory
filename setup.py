@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name = 'TableFactory',
-    version = '0.1.0.1',
+    version = '0.1.1',
     py_modules=['TableFactory'],
     description = 'Easily create HTML, spreadsheet, or PDF tables from common Python data sources',
     author='Kirk Strauser',
@@ -23,5 +23,5 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Text Processing :: Markup :: HTML',
         ],
-    requires=['xlwt', 'ReportLab'],
+    install_requires=['xlwt', 'ReportLab'],
         )

@@ -477,7 +477,7 @@ class HTMLTable(TableBase):
         else:
             cssstring = ''
         colspan = cell.style.span
-        if colspan:
+        if colspan > 1:
             colspanstring = ' colspan="%d"' % colspan
         else:
             colspanstring = ''
@@ -508,7 +508,7 @@ class HTMLTable(TableBase):
                 lines.append('    <tr>')
                 for headercolumn in headerrow:
                     span = headercolumn.style.span
-                    if span:
+                    if span > 1:
                         lines.append('      <th colspan="%d">%s</th>' % (span, headercolumn.title))
                     else:
                         lines.append('      <th>%s</th>' % headercolumn.title)
