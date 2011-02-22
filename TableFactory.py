@@ -58,6 +58,7 @@ __license__ = "GPLv3"
 __maintainer__ = "Kirk Strauser"
 __email__ = "kirk@strauser.com"
 __status__ = "Production"
+__version__ = "0.1.1"
 
 import cgi
 import copy
