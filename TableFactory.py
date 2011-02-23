@@ -458,11 +458,12 @@ class HTMLTable(TableBase):
     data. Note that this class yields *only* the table itself and not
     an entire HTML document."""
 
-    # These are the CSS classes emitted by the generator
+    # These are the CSS classes emitted by the renderer
     cssdefs = {
-        'bold'      : 'cell_bold',
-        'money'     : 'cell_money',
-        'tablestyle': 'reporttable',
+        'bold'    : 'cell_bold',
+        'money'   : 'cell_money',
+        'table'   : 'reporttable',
+        'childrow': 'expand-child',
         }
     
     def _rendercell(self, cell):
@@ -498,7 +499,7 @@ class HTMLTable(TableBase):
 
         # Create the table
         if self.title:
-            lines.append('<table summary="%s" class="%s">' % (self.title, self.cssdefs['tablestyle']))
+            lines.append('<table summary="%s" class="%s">' % (self.title, self.cssdefs['table']))
         else:
             lines.append('<table style="%s">' % self.cssdefs['tablestyle'])
 
@@ -522,8 +523,11 @@ class HTMLTable(TableBase):
         for rowsetindex, rowset in enumerate(rowsets):
             if isinstance(rowset, TableRow):
                 rowset = [rowset]
-            for subrow in rowset:
-                lines.append('    <tr class="tr_%s">' % ('odd', 'even')[rowsetindex % 2])
+            for subrowindex, subrow in enumerate(rowset):
+                trclasses = [('odd', 'even')[rowsetindex % 2]]
+                if subrowindex:
+                    trclasses.append(self.cssdefs['childrow'])
+                lines.append('    <tr class="%s">' % ' '.join(trclasses))
                 for cell in subrow:
                     lines.append('      %s' % self._rendercell(cell))
                 lines.append('    </tr>')
