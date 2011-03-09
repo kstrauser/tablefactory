@@ -54,7 +54,7 @@ return {'tablecontents': table3.render(lines)}
 __author__ = "Kirk Strauser"
 __copyright__ = "Copyright 2011, Daycos"
 __credits__ = ["Kirk Strauser"]
-__license__ = "GPLv3"
+__license__ = "MIT License"
 __maintainer__ = "Kirk Strauser"
 __email__ = "kirk@strauser.com"
 __status__ = "Production"
@@ -210,6 +210,8 @@ class TableBase(object):
     """Base class implementing common functionality for all table
     classes."""
 
+    castfunctions = {}
+    
     def __init__(self, title=None, explanation=None, headers=None):
         """A rowset is either a TableRow or a collection of
         TableRows. 'rowsets' is a collection of rowsets. Passing
@@ -248,8 +250,9 @@ class TableBase(object):
         output format"""
         if cell.value is None:
             return ''
-        else:
-            return cgi.escape(str(cell.value))
+        value = cell.value
+        castfunction = self.castfunctions.get(type(value), str)
+        return cgi.escape(castfunction(value))
 
 class PDFTable(TableBase):
     """Table generator that yields a PDF representation of the data"""
