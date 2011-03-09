@@ -58,7 +58,7 @@ __license__ = "MIT License"
 __maintainer__ = "Kirk Strauser"
 __email__ = "kirk@strauser.com"
 __status__ = "Production"
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 import cgi
 import copy
