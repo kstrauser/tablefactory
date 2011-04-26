@@ -85,6 +85,9 @@ class StyleAttributes(object):
 
           span: integer, the number of columns the cell should span
 
+          raw: bool, use the cell's contents as-is without escaping
+          them
+
     By acting as a thin wrapper around a dict and deferring
     calculations until they're needed, we don't do any unnecessary
     work or have to worry about values being updated after they're
@@ -145,12 +148,21 @@ class ColumnSpec(object):
     def __init__(self, attribute, title=None, **properties):
         """'attribute' is the name of the attribute or dictionary key
         that will be pulled from a row object to find a cell's
-        value. If this ColumnSpec is printed as part of a table header
-        it will be captioned with 'title', which defaults to the value
-        of 'attribute'. Any properties will be applied to cells
-        created by this ColumnSpec."""
-        
-        self.attribute = attribute
+        value. If 'attribute' is a tuple, each of its elements will be
+        resolved in turn, recursively. For example, an attribute tuple
+        of ('foo', 'bar', 'baz') might resolve to:
+
+        >>> rowobject['foo'].bar['baz']
+
+        If this ColumnSpec is printed as part of a table header it
+        will be captioned with 'title', which defaults to the value of
+        'attribute'. Any properties will be applied to cells created
+        by this ColumnSpec."""
+
+        if isinstance(attribute, tuple):
+            self.attributes = attribute
+        else:
+            self.attributes = (attribute,)
         if title:
             self.title = title
         else:
@@ -190,10 +202,11 @@ class RowSpec(object):
         object."""
         output = []
         for column in self.columnspecs:
-            try:
-                value = rowobject[column.attribute]
-            except (KeyError, TypeError):
-                value = getattr(rowobject, column.attribute)
+            for attribute in column.attributes:
+                try:
+                    value = rowobject[attribute]
+                except (KeyError, TypeError):
+                    value = getattr(rowobject, attribute)
             output.append(Cell(value, column.style))
         return TableRow(*output)
 
@@ -248,9 +261,11 @@ class TableBase(object):
         """This doesn't do a lot right now, but this is where we'd
         implement code to convert various datatypes to their desired
         output format"""
-        if cell.value is None:
-            return ''
         value = cell.value
+        if cell.style.raw:
+            return value
+        if value is None:
+            return ''
         castfunction = self.castfunctions.get(type(value), str)
         return cgi.escape(castfunction(value))
 
@@ -504,7 +519,7 @@ class HTMLTable(TableBase):
         if self.title:
             lines.append('<table summary="%s" class="%s">' % (self.title, self.cssdefs['table']))
         else:
-            lines.append('<table style="%s">' % self.cssdefs['tablestyle'])
+            lines.append('<table class="%s">' % self.cssdefs['table'])
 
         # Generate any header rows
         if self.headers:
