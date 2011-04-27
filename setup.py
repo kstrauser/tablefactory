@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name = 'TableFactory',
-    version = '0.1.2',
+    version = '0.1.3',
     py_modules=['TableFactory'],
     description = 'Easily create HTML, spreadsheet, or PDF tables from common Python data sources',
     author='Kirk Strauser',
