@@ -93,7 +93,12 @@ rows = [...list of dicts, SQLAlchemy row objects, or just
         by name or attribute...]
 </pre>
 
-<p>First, I made a "row specification" with three columns for the invoice number, a customer's name, and an invoice amount:</p>
+<p>First, I made a "row specification" with three columns for the invoice
+number, a customer's name, and an invoice amount. The first argument to
+ColumnSpec is the name of the key or attribute to retrieve from a row
+object. The optional second argument is the name of the column in the
+generated report.
+</p>
 
 <pre>
 invoicerow = RowSpec(ColumnSpec('invoiceid', 'Invoice #'),
@@ -109,6 +114,11 @@ rows into a list of TableFactory's "TableRow" objects:</p>
 <p>Finally, I created each of the tables:</p>
 
 <h3>HTML</h3>
+
+<p>Although not apparent in the screenshot below, the HTMLTable generator
+uses CSS classes compatable with the <a href="http://tablesorter.com/docs/">tablesorter plugin</a>
+for jQuery.</p>
+
 <pre>
 HTMLTable('Invoices by Customer',
           'Amount of each invoice, sorted by invoiceid',
