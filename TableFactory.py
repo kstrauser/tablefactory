@@ -134,7 +134,7 @@ class TableRow(object):
 
     def __repr__(self):
         """Human-readable TableRow representation"""
-        return '<TableRow(%s)>' % str(self.cells)
+        return '<TableRow(%s)>' % unicode(self.cells)
 
     def __iter__(self):
         """Return each of the row's cells in turn"""
@@ -193,7 +193,7 @@ class RowSpec(object):
 
     def __repr__(self):
         """Human-readable RowSpec representation"""
-        return '<RowSpec(%s)>' % str(self.columnspecs)
+        return '<RowSpec(%s)>' % unicode(self.columnspecs)
 
     def __call__(self, rowobject):
         """A RowSpec can be used as a factory that can take an object
@@ -202,11 +202,12 @@ class RowSpec(object):
         object."""
         output = []
         for column in self.columnspecs:
+            value = rowobject
             for attribute in column.attributes:
                 try:
-                    value = rowobject[attribute]
+                    value = value[attribute]
                 except (KeyError, TypeError):
-                    value = getattr(rowobject, attribute)
+                    value = getattr(value, attribute)
             output.append(Cell(value, column.style))
         return TableRow(*output)
 
@@ -266,7 +267,7 @@ class TableBase(object):
             return value
         if value is None:
             return ''
-        castfunction = self.castfunctions.get(type(value), str)
+        castfunction = self.castfunctions.get(type(value), unicode)
         return cgi.escape(castfunction(value))
 
 class PDFTable(TableBase):
