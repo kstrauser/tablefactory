@@ -73,6 +73,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 from reportlab.platypus.tables import TableStyle, Table
 
+
 class StyleAttributes(object):
     """StyleAttribute objects represent the formatting that will be
     applied to a cell. Current properties are:
@@ -80,7 +81,7 @@ class StyleAttributes(object):
           bold: bool, display a cell in bold
 
           money: bool, display the cell right-aligned
-    
+
           width: float, the width of a column in inches
 
           span: integer, the number of columns the cell should span
@@ -92,7 +93,7 @@ class StyleAttributes(object):
     calculations until they're needed, we don't do any unnecessary
     work or have to worry about values being updated after they're
     calculated."""
-    
+
     def __init__(self, **properties):
         """Save the value of keyword/dict properties"""
         self.properties = properties
@@ -106,7 +107,8 @@ class StyleAttributes(object):
         if key == 'span' and value is None:
             return 1
         return value
-    
+
+
 class Cell(object):
     """Cell objects represent a single table cell"""
 
@@ -114,7 +116,7 @@ class Cell(object):
         """'value' is the displayed value of the cell. 'properties' is
         a dict of cell styles that each table generator may interpret
         as appropriate."""
-        
+
         self.value = value
         if style is None:
             self.style = StyleAttributes()
@@ -124,6 +126,7 @@ class Cell(object):
     def __repr__(self):
         """Human-readable Cell representation"""
         return '<Cell(%s)>' % self.value
+
 
 class TableRow(object):
     """A TableRow is a list of cells"""
@@ -140,11 +143,12 @@ class TableRow(object):
         """Return each of the row's cells in turn"""
         for cell in self.cells:
             yield cell
-    
+
+
 class ColumnSpec(object):
     """A ColumnSpec describes the source of values for a particular
     column, as well as the properties of each of its cells"""
-    
+
     def __init__(self, attribute, title=None, **properties):
         """'attribute' is the name of the attribute or dictionary key
         that will be pulled from a row object to find a cell's
@@ -173,6 +177,7 @@ class ColumnSpec(object):
         """Human-readable ColumnSpec representation"""
         return '<ColumnSpec(%s)>' % self.title
 
+
 class RowSpec(object):
     """A RowSpec is a list of ColumnSpecs. It has two main uses:
 
@@ -186,7 +191,7 @@ class RowSpec(object):
     TableRows as it's easy and it also guarantees that your column
     titles (see #1 above) will match their contents.
     """
-    
+
     def __init__(self, *columnspecs):
         """Store the given list of ColumnSpecs"""
         self.columnspecs = columnspecs
@@ -220,12 +225,13 @@ class RowSpec(object):
         """Create a list of TableRows from a list of source objects"""
         return [self(rowobject) for rowobject in rowobjects]
 
+
 class TableBase(object):
     """Base class implementing common functionality for all table
     classes."""
 
     castfunctions = {}
-    
+
     def __init__(self, title=None, explanation=None, headers=None):
         """A rowset is either a TableRow or a collection of
         TableRows. 'rowsets' is a collection of rowsets. Passing
@@ -270,6 +276,7 @@ class TableBase(object):
         castfunction = self.castfunctions.get(type(value), unicode)
         return cgi.escape(castfunction(value))
 
+
 class PDFTable(TableBase):
     """Table generator that yields a PDF representation of the data"""
 
@@ -280,26 +287,26 @@ class PDFTable(TableBase):
 
     # Every table starts off with this style
     tablebasestyle = TableStyle([
-            ('TOPPADDING', (0,0), (-1,-1), 0),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 0),
-            ('LEFTPADDING', (0,0), (-1,-1), 0),
-            ('RIGHTPADDING', (0,0), (-1,-1), 0),
-            ('VALIGN', (0,0), (-1,-1), 'TOP'),
-            ('INNERGRID', (0,0), (-1,-1), 1, gridcolor),
+            ('TOPPADDING', (0, 0), (-1, -1), 0),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('INNERGRID', (0, 0), (-1, -1), 1, gridcolor),
             ])
 
     # The parent table is the outside wrapper around everything
     tableparentstyle = TableStyle([
-            ('ROWBACKGROUNDS', (0,0), (-1,-1), [rowoddcolor, rowevencolor]),
-            ('LINEABOVE', (0,1), (-1,-2), 1, colors.black),
-            ('LINEBELOW', (0,1), (-1,-2), 1, colors.black),
-            ('BOX', (0,0), (-1,-1), 1, colors.black),
+            ('ROWBACKGROUNDS', (0, 0), (-1, -1), [rowoddcolor, rowevencolor]),
+            ('LINEABOVE', (0, 1), (-1, -2), 1, colors.black),
+            ('LINEBELOW', (0, 1), (-1, -2), 1, colors.black),
+            ('BOX', (0, 0), (-1, -1), 1, colors.black),
             ])
 
     # Give content rows a little bit of side padding
     tablerowstyle = TableStyle([
-            ('LEFTPADDING', (0,0), (-1,-1), 3),
-            ('RIGHTPADDING', (0,0), (-1,-1), 3),
+            ('LEFTPADDING', (0, 0), (-1, -1), 3),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 3),
             ])
 
     tableheaderstyle = TableStyle([
@@ -316,7 +323,7 @@ class PDFTable(TableBase):
         """Render data as a Paragraph"""
 
         value = self._cast(cell)
-        
+
         # Wrap the cell's contents in onion-tag goodness
         if cell.style.bold:
             value = '<b>%s</b>' % value
@@ -326,7 +333,7 @@ class PDFTable(TableBase):
         else:
             style = self.contentcellstyle
         return Paragraph(value, style)
-    
+
     def render(self, rowsets):
         """Return the data as a binary string holding a PDF"""
 
@@ -382,7 +389,8 @@ class PDFTable(TableBase):
                                 rightMargin=.5 * inch, leftMargin=.5 * inch)
         doc.build(components)
         return stringbuf.getvalue()
-            
+
+
 class SpreadsheetTable(TableBase):
     """Table generator that yields an Excel spreadsheet representation
     of the data. It will have one worksheet named with the given
@@ -395,8 +403,8 @@ class SpreadsheetTable(TableBase):
     # Styles to apply to given data types. The style for None is the
     # default when no other type is applicable.
     styletypemap = {
-        None             : {None: xlwt.easyxf()},
-        datetime.date    : {None: xlwt.easyxf(num_format_str='YYYY-MM-DD')},
+        None: {None: xlwt.easyxf()},
+        datetime.date: {None: xlwt.easyxf(num_format_str='YYYY-MM-DD')},
         datetime.datetime: {None: xlwt.easyxf(num_format_str='YYYY-MM-DD HH:MM:SS')},
         }
 
@@ -432,7 +440,7 @@ class SpreadsheetTable(TableBase):
         # Cache the results for next time
         cellstyles[tuple(sorted(attrs))] = cellstyle
         return cellstyle
-    
+
     def render(self, rowsets):
         """Return the data as a binary string holding an Excel spreadsheet"""
         book = xlwt.Workbook()
@@ -445,7 +453,7 @@ class SpreadsheetTable(TableBase):
             # will take over. I have no idea why.
             mainsheet.row(0).set_style(self.styletypemap[None][None])
             rownum += 2
-        
+
         # Generate any header rows
         if self.headers:
             for headerrow in self.headers:
@@ -471,7 +479,8 @@ class SpreadsheetTable(TableBase):
         stringbuf = StringIO.StringIO()
         book.save(stringbuf)
         return stringbuf.getvalue()
-            
+
+
 class HTMLTable(TableBase):
     """Table generator that yields an HTML representation of the
     data. Note that this class yields *only* the table itself and not
@@ -490,27 +499,27 @@ class HTMLTable(TableBase):
 
     For example, the following lines in a page's <head> section will
     enable all of those client-side options:
-    
-        <script type="text/javascript" src="/javascript/jquery-1.5.min.js"></script> 
-        <script type="text/javascript" src="/javascript/jquery.tablesorter.min.js"></script> 
-        <script type="text/javascript" src="/javascript/jquery.tablesorter.mod.js"></script> 
-        <script type="text/javascript">                                         
-        $(document).ready(function() 
-            { 
-                $(".reporttable").tablesorter({widgets: ['zebra']}); 
-            } 
+
+        <script type="text/javascript" src="/javascript/jquery-1.5.min.js"></script>
+        <script type="text/javascript" src="/javascript/jquery.tablesorter.min.js"></script>
+        <script type="text/javascript" src="/javascript/jquery.tablesorter.mod.js"></script>
+        <script type="text/javascript">
+        $(document).ready(function()
+            {
+                $(".reporttable").tablesorter({widgets: ['zebra']});
+            }
         );
     """
 
     # These are the CSS classes emitted by the renderer
     cssdefs = {
-        'bold'    : 'cell_bold',
-        'money'   : 'cell_money',
-        'table'   : 'reporttable',
+        'bold': 'cell_bold',
+        'money': 'cell_money',
+        'table': 'reporttable',
         'childrow': 'expand-child',
-        'zebra'   : ('odd', 'even'),
+        'zebra': ('odd', 'even'),
         }
-    
+
     def _rendercell(self, cell):
         """Render data as a td"""
 
@@ -560,7 +569,7 @@ class HTMLTable(TableBase):
                     else:
                         lines.append('      <th>%s</th>' % headercolumn.title)
                 lines.append('    </tr>')
-                
+
             lines.append('  </thead>')
         lines.append('  <tbody>')
 
@@ -581,7 +590,8 @@ class HTMLTable(TableBase):
         lines.append('  </tbody>')
         lines.append('</table>')
         return '\n'.join(lines)
-    
+
+
 def example():
     """Create a set of sample tables"""
 
@@ -610,9 +620,9 @@ table.reporttable td.cell_money { text-align: right; font-family: monospace; }
 </html>"""
 
     exampletypes = ((PDFTable, 'pdf'), (HTMLTable, 'html'), (SpreadsheetTable, 'xls'))
-    
+
     #### Example with several row types
-    
+
     mainrs = RowSpec(
         ColumnSpec('foo', 'Column 1', width=1),
         ColumnSpec('bar', 'Column 2', width=1),
@@ -650,7 +660,6 @@ table.reporttable td.cell_money { text-align: right; font-family: monospace; }
         if tableclass is HTMLTable:
             outfile.write(htmlfooter)
 
-            
     #### Example of a typical "invoices" table
 
     import decimal
@@ -670,7 +679,7 @@ table.reporttable td.cell_money { text-align: right; font-family: monospace; }
                          ColumnSpec('name', 'Customer Name'),
                          ColumnSpec('amount', 'Total', money=True))
     lines = invoicerow.makeall(rows)
-    
+
     for tableclass, extension in exampletypes:
         outfile = open('invoice.%s' % extension, 'wb')
         if tableclass is HTMLTable:
