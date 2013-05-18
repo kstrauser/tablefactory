@@ -4,6 +4,12 @@ ReportLab makes PDFS and xlwt makes spreadsheets. It's especially well
 suited to adding reporting capabilities to your Pyramid, TurboGears, Pylons,
 or Django projects.
 
+> "For this, we found the TableFactory API developed by Kirk Strauser is
+> very much evolved and beautiful.
+>
+> For a Python novice like me, you helped me bypass the labyrinth of
+> ReportLab and xlwt. Thanks again!" - Swara Technologies
+
 # Motivation
 
 I maintain a website that provides many custom reports to its users, and
