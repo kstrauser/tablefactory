@@ -13,6 +13,31 @@ from TableFactory import layout
 from TableFactory.base import TableBase
 
 
+class PDFReport(object):  # pylint: disable=R0903
+    """A PDFReport contains one or more PDFTables"""
+
+    def __init__(self, table=None):
+        if table is None:
+            self.tables = []
+        else:
+            self.tables = table
+
+    def add(self, table):
+        """Add the output of PDFTable.prepare() to the report"""
+        if self.tables:
+            self.tables.append(Spacer(0, .3 * inch))
+        self.tables.extend(table)
+
+    def build(self):
+        """Return the report as a binary string holding a PDF"""
+        stringbuf = StringIO.StringIO()
+        doc = SimpleDocTemplate(stringbuf,
+                                bottomMargin=.5 * inch, topMargin=.5 * inch,
+                                rightMargin=.5 * inch, leftMargin=.5 * inch)
+        doc.build(self.tables)
+        return stringbuf.getvalue()
+
+
 class PDFTable(TableBase):  # pylint: disable=R0903
     """Table generator that yields a PDF representation of the data"""
 
@@ -77,9 +102,8 @@ class PDFTable(TableBase):  # pylint: disable=R0903
             style = self.contentcellstyle
         return Paragraph(value, style)
 
-    def render(self, rowsets):  # pylint: disable=R0914
-        """Return the data as a binary string holding a PDF"""
-
+    def prepare(self, rowsets):
+        """Return the ready-to-render table components"""
         # Start by creating the table headers
         rowtables = []
         if self.headers:
@@ -125,10 +149,11 @@ class PDFTable(TableBase):  # pylint: disable=R0903
                                Paragraph(self.explanation, self.explanationstyle)])
         components.extend([Spacer(1, .3 * inch), parenttable])
 
+        return components
+
+    def render(self, rowsets):  # pylint: disable=R0914
+        """Return the table as a binary string holding a PDF"""
         # Compile the whole thing and return the results
-        stringbuf = StringIO.StringIO()
-        doc = SimpleDocTemplate(stringbuf,
-                                bottomMargin=.5 * inch, topMargin=.5 * inch,
-                                rightMargin=.5 * inch, leftMargin=.5 * inch)
-        doc.build(components)
-        return stringbuf.getvalue()
+        report = PDFReport()
+        report.add(self.prepare(rowsets))
+        return report.build()

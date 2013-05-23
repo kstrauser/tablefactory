@@ -61,5 +61,5 @@ __version__ = '0.2'
 from TableFactory.layout import (
     Cell, ColumnSpec, RowSpec, StyleAttributes, TableRow)
 from TableFactory.htmltable import HTMLTable
-from TableFactory.pdftable import PDFTable
+from TableFactory.pdftable import PDFReport, PDFTable
 from TableFactory.spreadsheettable import SpreadsheetTable
