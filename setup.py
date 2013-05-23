@@ -1,4 +1,7 @@
-from distutils.core import setup
+from distribute_setup import use_setuptools
+use_setuptools()
+
+from setuptools import setup
 
 setup(
     name='TableFactory',
@@ -28,5 +31,5 @@ the layout, applying formatting to cells, etc.""",
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Text Processing :: Markup :: HTML',
     ],
-    requires=['xlwt', 'ReportLab'],
+    install_requires=['xlwt', 'ReportLab'],
 )

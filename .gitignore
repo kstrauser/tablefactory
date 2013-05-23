@@ -5,3 +5,5 @@ MANIFEST
 bin/
 include/
 lib/
+*.egg-info/
+share/
