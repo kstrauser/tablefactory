@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """Base table class"""
 
 import cgi

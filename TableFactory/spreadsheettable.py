@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """Implementation of TableBase that generates spreadsheets"""
 
 import copy

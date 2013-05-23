@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """Classes that describe report layouts"""
 
 from reportlab.lib.units import inch

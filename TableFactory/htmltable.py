@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """Implementation of TableBase that generates HTML tables"""
 
 from TableFactory import layout
