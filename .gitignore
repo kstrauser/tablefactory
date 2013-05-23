@@ -7,3 +7,4 @@ include/
 lib/
 *.egg-info/
 share/
+build/
