@@ -57,4 +57,9 @@ __license__ = "MIT License"
 __email__ = "kirk@strauser.com"
 __version__ = '0.2'
 
-from spec import *
+
+from TableFactory.layout import (
+    Cell, ColumnSpec, RowSpec, StyleAttributes, TableRow)
+from TableFactory.htmltable import HTMLTable
+from TableFactory.pdftable import PDFTable
+from TableFactory.spreadsheettable import SpreadsheetTable
