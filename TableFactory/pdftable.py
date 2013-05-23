@@ -1,6 +1,21 @@
 #!/usr/bin/env python
 
-class PDFTable(TableBase):
+"""Implementation of TableBase that generates PDF tables"""
+
+import StringIO
+
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_RIGHT
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+from reportlab.platypus.tables import TableStyle, Table
+
+from TableFactory import layout
+from TableFactory.base import TableBase
+
+
+class PDFTable(TableBase):  # pylint: disable=R0903
     """Table generator that yields a PDF representation of the data"""
 
     rowoddcolor = colors.Color(.92, .92, .92)
@@ -10,37 +25,44 @@ class PDFTable(TableBase):
 
     # Every table starts off with this style
     tablebasestyle = TableStyle([
-            ('TOPPADDING', (0, 0), (-1, -1), 0),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
-            ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('INNERGRID', (0, 0), (-1, -1), 1, gridcolor),
-            ])
+        ('TOPPADDING', (0, 0), (-1, -1), 0),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('INNERGRID', (0, 0), (-1, -1), 1, gridcolor),
+    ])
 
     # The parent table is the outside wrapper around everything
     tableparentstyle = TableStyle([
-            ('ROWBACKGROUNDS', (0, 0), (-1, -1), [rowoddcolor, rowevencolor]),
-            ('LINEABOVE', (0, 1), (-1, -2), 1, colors.black),
-            ('LINEBELOW', (0, 1), (-1, -2), 1, colors.black),
-            ('BOX', (0, 0), (-1, -1), 1, colors.black),
-            ])
+        ('ROWBACKGROUNDS', (0, 0), (-1, -1), [rowoddcolor, rowevencolor]),
+        ('LINEABOVE', (0, 1), (-1, -2), 1, colors.black),
+        ('LINEBELOW', (0, 1), (-1, -2), 1, colors.black),
+        ('BOX', (0, 0), (-1, -1), 1, colors.black),
+    ])
 
     # Give content rows a little bit of side padding
     tablerowstyle = TableStyle([
-            ('LEFTPADDING', (0, 0), (-1, -1), 3),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-            ])
+        ('LEFTPADDING', (0, 0), (-1, -1), 3),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+    ])
 
     tableheaderstyle = TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), headerbackgroundcolor),
-            ])
+        ('BACKGROUND', (0, 0), (-1, -1), headerbackgroundcolor),
+    ])
 
-    titlestyle = ParagraphStyle(name='Title Style', fontName='Helvetica-Bold', fontSize=16)
-    explanationstyle = ParagraphStyle(name='Explanation Style', fontName='Helvetica', fontSize=12)
-    headercellstyle = ParagraphStyle(name='Table Header Style', fontName='Helvetica-Bold', textColor=colors.white)
-    contentcellstyle = ParagraphStyle(name='Table Cell Style', fontName='Helvetica', fontSize=8)
-    contentmoneycellstyle = ParagraphStyle(name='Table Cell Style', fontName='Helvetica', fontSize=8, alignment=TA_RIGHT)
+    titlestyle = ParagraphStyle(
+        name='Title Style', fontName='Helvetica-Bold', fontSize=16)
+    explanationstyle = ParagraphStyle(
+        name='Explanation Style', fontName='Helvetica', fontSize=12)
+    headercellstyle = ParagraphStyle(
+        name='Table Header Style', fontName='Helvetica-Bold',
+        textColor=colors.white)
+    contentcellstyle = ParagraphStyle(
+        name='Table Cell Style', fontName='Helvetica', fontSize=8)
+    contentmoneycellstyle = ParagraphStyle(
+        name='Table Cell Style', fontName='Helvetica', fontSize=8,
+        alignment=TA_RIGHT)
 
     def _rendercell(self, cell):
         """Render data as a Paragraph"""
@@ -57,7 +79,7 @@ class PDFTable(TableBase):
             style = self.contentcellstyle
         return Paragraph(value, style)
 
-    def render(self, rowsets):
+    def render(self, rowsets):  # pylint: disable=R0914
         """Return the data as a binary string holding a PDF"""
 
         # Start by creating the table headers
@@ -79,7 +101,7 @@ class PDFTable(TableBase):
         # Then create a table to hold the contents of each line
         for rowset in rowsets:
             subrowtables = []
-            if isinstance(rowset, TableRow):
+            if isinstance(rowset, layout.TableRow):
                 rowset = [rowset]
             for subrow in rowset:
                 subrowtable = Table([[self._rendercell(cell) for cell in subrow]],
