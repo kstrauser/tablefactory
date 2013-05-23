@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 
+"""Base table class"""
 
-class TableBase(object):
+import cgi
+
+from TableFactory import layout
+
+
+class TableBase(object):  # pylint: disable=R0903
     """Base class implementing common functionality for all table
     classes."""
 
@@ -34,7 +40,7 @@ class TableBase(object):
         """
         self.title = title
         self.explanation = explanation
-        if isinstance(headers, RowSpec):
+        if isinstance(headers, layout.RowSpec):
             self.headers = [headers]
         else:
             self.headers = headers
