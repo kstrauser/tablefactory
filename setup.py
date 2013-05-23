@@ -1,14 +1,19 @@
 from distutils.core import setup
 
 setup(
-    name = 'TableFactory',
-    version = '0.1.4',
-    py_modules=['TableFactory'],
-    description = 'Easily create HTML, spreadsheet, or PDF tables from common Python data sources',
+    name='TableFactory',
+    version='0.2',
+    packages=['TableFactory'],
+    description='Easily create HTML, spreadsheet, or PDF tables from common '
+                'Python data sources',
     author='Kirk Strauser',
     author_email='kirk@strauser.com',
     url='http://kstrauser.github.com/tablefactory/',
-    long_description='TableFactory is a simple API for creating tables in popular formats. It acts as a wrapper around other widely used Python report generators and handles all the tedious, boilerplate problems of extracting columns from input data, creating the layout, applying formatting to cells, etc.',
+    long_description="""\
+TableFactory is a simple API for creating tables in popular formats. It acts as
+a wrapper around other widely used Python report generators and handles all the
+tedious, boilerplate problems of extracting columns from input data, creating
+the layout, applying formatting to cells, etc.""",
     keywords=['reports', 'pdf', 'spreadsheet'],
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -22,6 +27,6 @@ setup(
         'Topic :: Office/Business :: Financial :: Spreadsheet',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Text Processing :: Markup :: HTML',
-        ],
-    install_requires=['xlwt', 'ReportLab'],
-        )
+    ],
+    requires=['xlwt', 'ReportLab'],
+)

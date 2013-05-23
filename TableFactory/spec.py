@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2011 Kirk Strauser
+# Copyright (c) 2013 Kirk Strauser
 
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -52,13 +52,10 @@ return {'tablecontents': table3.render(lines)}
 """
 
 __author__ = "Kirk Strauser"
-__copyright__ = "Copyright 2011, Daycos"
+__copyright__ = "Copyright 2013, Daycos and Kirk Strauser"
 __credits__ = ["Kirk Strauser"]
 __license__ = "MIT License"
-__maintainer__ = "Kirk Strauser"
 __email__ = "kirk@strauser.com"
-__status__ = "Production"
-__version__ = "0.1.2"
 
 import cgi
 import copy

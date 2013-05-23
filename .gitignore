@@ -1,3 +1,7 @@
 *.pyc
 dist/
 MANIFEST
+.Python
+bin/
+include/
+lib/
