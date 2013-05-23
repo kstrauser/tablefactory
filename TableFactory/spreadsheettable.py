@@ -1,21 +1,18 @@
 #!/usr/bin/env python
 
+"""Implementation of TableBase that generates spreadsheets"""
 
-import cgi
 import copy
 import datetime
 import StringIO
 
 import xlwt
-from reportlab.lib import colors
-from reportlab.lib.enums import TA_RIGHT
-from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
-from reportlab.platypus.tables import TableStyle, Table
+
+from TableFactory import layout
+from TableFactory.base import TableBase
 
 
-class SpreadsheetTable(TableBase):
+class SpreadsheetTable(TableBase):  # pylint: disable=R0903
     """Table generator that yields an Excel spreadsheet representation
     of the data. It will have one worksheet named with the given
     title"""
@@ -30,7 +27,7 @@ class SpreadsheetTable(TableBase):
         None: {None: xlwt.easyxf()},
         datetime.date: {None: xlwt.easyxf(num_format_str='YYYY-MM-DD')},
         datetime.datetime: {None: xlwt.easyxf(num_format_str='YYYY-MM-DD HH:MM:SS')},
-        }
+    }
 
     def _getstyle(self, cell):
         """Return the appropriate style for a cell, generating it
@@ -90,7 +87,7 @@ class SpreadsheetTable(TableBase):
 
         # Write every line
         for rowset in rowsets:
-            if isinstance(rowset, TableRow):
+            if isinstance(rowset, layout.TableRow):
                 rowset = [rowset]
             for subrow in rowset:
                 colnum = 0
