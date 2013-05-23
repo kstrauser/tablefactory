@@ -1,20 +1,11 @@
 #!/usr/bin/env python
 
-import cgi
-import copy
-import datetime
-import StringIO
+"""Classes that describe report layouts"""
 
-import xlwt
-from reportlab.lib import colors
-from reportlab.lib.enums import TA_RIGHT
-from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
-from reportlab.platypus.tables import TableStyle, Table
 
 
-class StyleAttributes(object):
+class StyleAttributes(object):  # pylint: disable=R0903
     """StyleAttribute objects represent the formatting that will be
     applied to a cell. Current properties are:
 
@@ -49,7 +40,7 @@ class StyleAttributes(object):
         return value
 
 
-class Cell(object):
+class Cell(object):  # pylint: disable=R0903
     """Cell objects represent a single table cell"""
 
     def __init__(self, value, style=None):
@@ -68,7 +59,7 @@ class Cell(object):
         return '<Cell(%s)>' % self.value
 
 
-class TableRow(object):
+class TableRow(object):  # pylint: disable=R0903
     """A TableRow is a list of cells"""
 
     def __init__(self, *cells):
@@ -85,7 +76,7 @@ class TableRow(object):
             yield cell
 
 
-class ColumnSpec(object):
+class ColumnSpec(object):  # pylint: disable=R0903
     """A ColumnSpec describes the source of values for a particular
     column, as well as the properties of each of its cells"""
 
@@ -118,7 +109,7 @@ class ColumnSpec(object):
         return '<ColumnSpec(%s)>' % self.title
 
 
-class RowSpec(object):
+class RowSpec(object):  # pylint: disable=R0903
     """A RowSpec is a list of ColumnSpecs. It has two main uses:
 
     1) When passed to a table generator as the 'headers' argument
@@ -154,7 +145,7 @@ class RowSpec(object):
                 except (KeyError, TypeError):
                     value = getattr(value, attribute)
             output.append(Cell(value, column.style))
-        return TableRow(*output)
+        return TableRow(*output)  # pylint: disable=W0142
 
     def __iter__(self):
         """Return each of the row's ColumnSpecs in turn"""
