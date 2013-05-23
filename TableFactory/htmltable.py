@@ -1,21 +1,12 @@
 #!/usr/bin/env python
 
+"""Implementation of TableBase that generates HTML tables"""
 
-import cgi
-import copy
-import datetime
-import StringIO
-
-import xlwt
-from reportlab.lib import colors
-from reportlab.lib.enums import TA_RIGHT
-from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
-from reportlab.platypus.tables import TableStyle, Table
+from TableFactory import layout
+from TableFactory.base import TableBase
 
 
-class HTMLTable(TableBase):
+class HTMLTable(TableBase):  # pylint: disable=R0903
     """Table generator that yields an HTML representation of the
     data. Note that this class yields *only* the table itself and not
     an entire HTML document.
@@ -34,9 +25,14 @@ class HTMLTable(TableBase):
     For example, the following lines in a page's <head> section will
     enable all of those client-side options:
 
-        <script type="text/javascript" src="/javascript/jquery-1.5.min.js"></script>
-        <script type="text/javascript" src="/javascript/jquery.tablesorter.min.js"></script>
-        <script type="text/javascript" src="/javascript/jquery.tablesorter.mod.js"></script>
+        <script type="text/javascript"
+            src="/javascript/jquery-1.5.min.js"></script>
+        <script
+            type="text/javascript"
+            src="/javascript/jquery.tablesorter.min.js"></script>
+        <script
+            type="text/javascript"
+            src="/javascript/jquery.tablesorter.mod.js"></script>
         <script type="text/javascript">
         $(document).ready(function()
             {
@@ -52,7 +48,7 @@ class HTMLTable(TableBase):
         'table': 'reporttable',
         'childrow': 'expand-child',
         'zebra': ('odd', 'even'),
-        }
+    }
 
     def _rendercell(self, cell):
         """Render data as a td"""
@@ -71,9 +67,10 @@ class HTMLTable(TableBase):
             colspanstring = ' colspan="%d"' % colspan
         else:
             colspanstring = ''
-        return '<td%s%s>%s</td>' % (cssstring, colspanstring, self._cast(cell).replace('\r', '<br />'))
+        return '<td%s%s>%s</td>' % (
+            cssstring, colspanstring, self._cast(cell).replace('\r', '<br />'))
 
-    def render(self, rowsets):
+    def render(self, rowsets):  # pylint: disable=R0912
         """Return the data as a string of HTML"""
         lines = []
 
@@ -87,7 +84,8 @@ class HTMLTable(TableBase):
 
         # Create the table
         if self.title:
-            lines.append('<table summary="%s" class="%s">' % (self.title, self.cssdefs['table']))
+            lines.append('<table summary="%s" class="%s">' % (
+                self.title, self.cssdefs['table']))
         else:
             lines.append('<table class="%s">' % self.cssdefs['table'])
 
@@ -109,7 +107,7 @@ class HTMLTable(TableBase):
 
         # Write every line
         for rowsetindex, rowset in enumerate(rowsets):
-            if isinstance(rowset, TableRow):
+            if isinstance(rowset, layout.TableRow):
                 rowset = [rowset]
             for subrowindex, subrow in enumerate(rowset):
                 trclasses = [self.cssdefs['zebra'][rowsetindex % 2]]
