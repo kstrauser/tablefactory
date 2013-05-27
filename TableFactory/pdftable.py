@@ -6,7 +6,7 @@ from reportlab.lib import colors
 from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Spacer
 from reportlab.platypus.tables import TableStyle, Table
 
 from TableFactory import layout
@@ -17,18 +17,19 @@ class PDFReport(object):  # pylint: disable=R0903
     """A PDFReport contains one or more PDFTables"""
 
     def __init__(self, table=None):
-        if table is None:
-            self.tables = []
-        else:
-            self.tables = table
+        self.tables = []
+        if table is not None:
+            self.add(table)
 
     def add(self, table):
         """Add the output of PDFTable.prepare() to the report"""
         if self.tables:
             self.tables.append(Spacer(0, .3 * inch))
-        self.tables.extend(table)
+            self.tables.append(KeepTogether(table))
+        else:
+            self.tables = table
 
-    def build(self):
+    def render(self):
         """Return the report as a binary string holding a PDF"""
         stringbuf = StringIO.StringIO()
         doc = SimpleDocTemplate(stringbuf,
@@ -156,4 +157,4 @@ class PDFTable(TableBase):  # pylint: disable=R0903
         # Compile the whole thing and return the results
         report = PDFReport()
         report.add(self.prepare(rowsets))
-        return report.build()
+        return report.render()

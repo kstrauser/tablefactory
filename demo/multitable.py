@@ -49,24 +49,33 @@ table.reporttable td.cell_money { text-align: right; font-family: monospace; }
         ColumnSpec('baz', bold=True, width=1),
         ColumnSpec('junk2'))
 
-    lines = []
-    lines.append([mainrs({'foo': 1, 'bar': 2, 'baz': 3, 'qux': 'Bar.  ' * 30}),
-                  subrow1({'subfoo1': 'And', 'subbar1': 'another'}),
-                  subrow2({'subfoo2': 'This is a test.  ' * 15}),
-                  subrow2({'subfoo2': 'And another test'})])
-    for i in range(5):
-        lines.append(mainrs({'foo': i, 'bar': 14, 'baz': 15, 'qux': 'extra'}))
-    lines.append(summaryrow({'junk1': None, 'baz': 'Summary!', 'junk2': None}))
+    def makelines(linecount):
+        lines = []
+        lines.append([mainrs({'foo': 1, 'bar': 2, 'baz': 3, 'qux': 'Bar.  ' * 30}),
+                      subrow1({'subfoo1': 'And', 'subbar1': 'another'}),
+                      subrow2({'subfoo2': 'This is a test.  ' * 15}),
+                      subrow2({'subfoo2': 'And another test'})])
+        for i in range(linecount):
+            lines.append(mainrs({'foo': i, 'bar': 14, 'baz': 15, 'qux': 'extra'}))
+        lines.append(summaryrow({'junk1': None, 'baz': 'Summary!', 'junk2': None}))
+        return lines
 
-    subtable = PDFTable(
-        'Sample Table',
-        'Multi-Table PDF test',
-        headers=[mainrs, subrow1, subrow2]).prepare(lines)
-    report = PDFReport(subtable)
-    report.add(subtable)
+    firsttable = PDFTable(
+        'Sample Table 1',
+        'Multi-Table PDF test (first table)',
+        headers=[mainrs, subrow1, subrow2]).prepare(makelines(20))
+    report = PDFReport(firsttable)
+
+    for i in range(5):
+        subtable = PDFTable(
+            'Sample Table %d' % (i + 2),
+            'Multi-Table PDF test (following table #%d' % (i + 1),
+            headers=[mainrs, subrow1, subrow2]).prepare(
+                makelines(((i + 1) * 73) % 40))
+        report.add(subtable)
 
     with open('multitable.pdf', 'wb') as outfile:
-        outfile.write(report.build())
+        outfile.write(report.render())
 
 
 if __name__ == '__main__':
